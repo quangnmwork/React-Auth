@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Box,
   FormControl,
@@ -10,9 +9,10 @@ import {
 import { useForm, SubmitHandler, Resolver } from "react-hook-form";
 import { AuthTypeNameSpace } from "../../IType/IType";
 import { login } from "../../api/login";
+import React from "react";
 const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
   return {
-    values: !values.email ? {} : values,
+    values: !values.email || !values.password ? {} : values,
     errors: !values.email
       ? {
           email: {
@@ -25,11 +25,17 @@ const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
 };
 
 const FormLogin = () => {
-  const [errLogin, setErrLogin] = useState<boolean>(false);
   const {
     register,
-    formState: { errors },
+    formState: {
+      errors,
+      isSubmitSuccessful,
+      isSubmitted,
+      isDirty,
+      dirtyFields,
+    },
     handleSubmit,
+    // watch,
   } = useForm<AuthTypeNameSpace.UserLoginInput>({ resolver });
   const onSubmit: SubmitHandler<AuthTypeNameSpace.UserLoginInput> = async (
     data: AuthTypeNameSpace.UserLoginInput
@@ -38,13 +44,25 @@ const FormLogin = () => {
     const res = await login(data);
     if (res.statusText === "OK") {
     } else {
-      setErrLogin(true);
     }
   };
-  console.log(errors);
+  // const emailInputWatching = watch("email"); // watching something like text change event
+  // console.log(emailInputWatching);
+  // console.log(isSubmitted); so this is check if the user has submitted
+  // isSubmitSuccessful is very convenient cause you dont need to use useState
+  React.useEffect(() => {
+    console.log(isDirty, dirtyFields);
+  }, [isDirty, dirtyFields]);
   return (
     <Box maxWidth={"30%"} mx={"auto"}>
-      <FormControl isInvalid={errLogin}>
+      <FormControl
+        isInvalid={
+          !isSubmitSuccessful &&
+          isSubmitted &&
+          !errors.email &&
+          !errors.password
+        }
+      >
         <FormControl isInvalid={errors.email ? true : false}>
           <FormLabel htmlFor="username">Username</FormLabel>
           <Input

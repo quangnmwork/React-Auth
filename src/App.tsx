@@ -1,10 +1,13 @@
 import LoginPage from "./pages/LoginPage";
-import { Box } from "@chakra-ui/react";
+
+import TestFeature from "./pages/TestFeature";
+import { Routes, Route } from "react-router-dom";
 function App() {
   return (
-    <Box mt={"12"}>
-      <LoginPage />
-    </Box>
+    <Routes>
+      <Route path="/" element={<LoginPage />}></Route>
+      <Route path="/test" element={<TestFeature />}></Route>
+    </Routes>
   );
 }
 
