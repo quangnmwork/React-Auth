@@ -35,6 +35,7 @@ const FormLogin = () => {
       dirtyFields,
     },
     handleSubmit,
+    reset,
     // watch,
   } = useForm<AuthTypeNameSpace.UserLoginInput>({ resolver });
   const onSubmit: SubmitHandler<AuthTypeNameSpace.UserLoginInput> = async (
@@ -43,6 +44,10 @@ const FormLogin = () => {
     console.log(data);
     const res = await login(data);
     if (res.statusText === "OK") {
+      reset({
+        email: "",
+        password: "",
+      }); // this will reset something of form
     } else {
     }
   };
