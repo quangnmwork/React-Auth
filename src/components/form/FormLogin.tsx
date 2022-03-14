@@ -7,9 +7,22 @@ import {
   Button,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, Resolver } from "react-hook-form";
 import { AuthTypeNameSpace } from "../../IType/IType";
 import { login } from "../../api/login";
+const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
+  return {
+    values: !values.email ? {} : values,
+    errors: !values.email
+      ? {
+          email: {
+            type: "required",
+            message: "This is required.",
+          },
+        }
+      : {},
+  };
+};
 
 const FormLogin = () => {
   const [errLogin, setErrLogin] = useState<boolean>(false);
@@ -17,7 +30,7 @@ const FormLogin = () => {
     register,
     formState: { errors },
     handleSubmit,
-  } = useForm<AuthTypeNameSpace.UserLoginInput>();
+  } = useForm<AuthTypeNameSpace.UserLoginInput>({ resolver });
   const onSubmit: SubmitHandler<AuthTypeNameSpace.UserLoginInput> = async (
     data: AuthTypeNameSpace.UserLoginInput
   ) => {
@@ -31,7 +44,7 @@ const FormLogin = () => {
   console.log(errors);
   return (
     <Box maxWidth={"30%"} mx={"auto"}>
-      <FormControl isInvalid={!errLogin}>
+      <FormControl isInvalid={errLogin}>
         <FormControl isInvalid={errors.email ? true : false}>
           <FormLabel htmlFor="username">Username</FormLabel>
           <Input
@@ -42,7 +55,7 @@ const FormLogin = () => {
           ></Input>
 
           <FormErrorMessage>
-            {errors.email && "Email is required"}
+            {errors.email ? errors.email?.message : ""}
           </FormErrorMessage>
         </FormControl>
         <FormControl isInvalid={errors.password ? true : false}>
