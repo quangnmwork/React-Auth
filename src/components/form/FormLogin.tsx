@@ -9,6 +9,7 @@ import {
 import { useForm, SubmitHandler, Resolver } from "react-hook-form";
 import { AuthTypeNameSpace } from "../../IType/IType";
 import { login } from "../../api/login";
+import { useAuth0 } from "@auth0/auth0-react";
 import React from "react";
 const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
   return {
@@ -24,7 +25,8 @@ const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
   };
 };
 
-const FormLogin = () => {
+const FormLogin: React.FC<{}> = () => {
+  const { loginWithRedirect } = useAuth0();
   const {
     register,
     formState: {
@@ -101,7 +103,10 @@ const FormLogin = () => {
           <Button
             colorScheme={"blue"}
             width={"100%"}
-            onClick={handleSubmit(onSubmit)}
+            onClick={() => {
+              handleSubmit(onSubmit);
+              loginWithRedirect();
+            }}
           >
             Login
           </Button>

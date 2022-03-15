@@ -9,6 +9,7 @@ function App() {
       <Route path="/" element={<LoginPage />}></Route>
       <Route path="/test" element={<TestFeature />}></Route>
       <Route path="/controller" element={<FormControllerApi />}></Route>
+      <Route path="/home" element={<FormControllerApi />}></Route>
     </Routes>
   );
 }
