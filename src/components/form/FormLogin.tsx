@@ -6,77 +6,50 @@ import {
   Button,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import { useForm, SubmitHandler, Resolver } from "react-hook-form";
-import { AuthTypeNameSpace } from "../../IType/IType";
-import { login } from "../../api/login";
-import { useAuth0 } from "@auth0/auth0-react";
-import React from "react";
-const resolver: Resolver<AuthTypeNameSpace.UserLoginInput> = async (values) => {
-  return {
-    values: !values.email || !values.password ? {} : values,
-    errors: !values.email
-      ? {
-          email: {
-            type: "required",
-            message: "This is required.",
-          },
-        }
-      : {},
-  };
-};
+import { useForm, SubmitHandler } from "react-hook-form";
+
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import React, { FormEvent, SyntheticEvent } from "react";
+
+interface IInput {
+  email: string;
+  password: string;
+}
+const schema = yup.object().shape({
+  email: yup
+    .string()
+    .required("Email không được trống")
+    .email("Email không hợp lệ"),
+  password: yup
+    .string()
+    .required("Mật khẩu không được trống")
+    .min(6, "Mật khẩu ít nhất là 6 kí tự"),
+});
 
 const FormLogin: React.FC<{}> = () => {
-  const { loginWithRedirect } = useAuth0();
   const {
     register,
-    formState: {
-      errors,
-      isSubmitSuccessful,
-      isSubmitted,
-      isDirty,
-      dirtyFields,
-    },
+    formState: { errors, isSubmitSuccessful, isSubmitted },
     handleSubmit,
-    reset,
     // watch,
-  } = useForm<AuthTypeNameSpace.UserLoginInput>({ resolver });
-  const onSubmit: SubmitHandler<AuthTypeNameSpace.UserLoginInput> = async (
-    data: AuthTypeNameSpace.UserLoginInput
-  ) => {
+  } = useForm<IInput>({
+    resolver: yupResolver(schema),
+  });
+  const onSubmit: SubmitHandler<IInput> = async (data: IInput) => {
     console.log(data);
-    const res = await login(data);
-    if (res.statusText === "OK") {
-      reset({
-        email: "",
-        password: "",
-      }); // this will reset something of form
-    } else {
-    }
+    console.log(errors); // only print if go through yup check
   };
-  // const emailInputWatching = watch("email"); // watching something like text change event
-  // console.log(emailInputWatching);
-  // console.log(isSubmitted); so this is check if the user has submitted
-  // isSubmitSuccessful is very convenient cause you dont need to use useState
-  React.useEffect(() => {
-    console.log(isDirty, dirtyFields);
-  }, [isDirty, dirtyFields]);
   return (
     <Box maxWidth={"30%"} mx={"auto"}>
-      <FormControl
-        isInvalid={
-          !isSubmitSuccessful &&
-          isSubmitted &&
-          !errors.email &&
-          !errors.password
-        }
-      >
+      <FormControl isInvalid={!isSubmitSuccessful && isSubmitted}>
         <FormControl isInvalid={errors.email ? true : false}>
           <FormLabel htmlFor="username">Username</FormLabel>
           <Input
             placeholder="Username"
             id="username"
             type={"text"}
-            {...register("email", { required: true })}
+            {...register("email")}
           ></Input>
 
           <FormErrorMessage>
@@ -88,26 +61,15 @@ const FormLogin: React.FC<{}> = () => {
           <Input
             id="password"
             type={"password"}
-            {...register("password", { required: true, minLength: 6 })}
+            {...register("password")}
           ></Input>
-          <FormErrorMessage>
-            {errors.password?.type === "minLength"
-              ? "Password length at least 6"
-              : "Password is required"}
-          </FormErrorMessage>
+          <FormErrorMessage></FormErrorMessage>
         </FormControl>
         <FormErrorMessage textAlign={"center"}>
-          {"Tài khoản mật khẩu không đúng"}
+          {errors.password ? errors.password?.message : ""}
         </FormErrorMessage>
         <Box mt={"2"}>
-          <Button
-            colorScheme={"blue"}
-            width={"100%"}
-            onClick={() => {
-              handleSubmit(onSubmit);
-              loginWithRedirect();
-            }}
-          >
+          <Button onClick={handleSubmit(onSubmit)} colorScheme={"red"}>
             Login
           </Button>
         </Box>
